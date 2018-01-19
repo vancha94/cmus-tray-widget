@@ -16,6 +16,8 @@ private:
     QAction *playCMUS;
     QAction *nextTrackCMUS;
     QAction *previosTrackCMUS;
+    QAction *stopCMUS;
+    int actionIndex;
 
     QString command;
     QVector<QString> arguments;
@@ -35,16 +37,18 @@ public slots:
     void pause();
     void nextTrack();
     void previosTrack();
+    void stop();
 
 private:
     void makeCommand(int arg);
-    void createAction(QAction *&action, const QString name, int data, bool isVisible = true);
+    void createAction(QAction *&action, const QString name, bool isVisible = true);
 
     void initStrings();
 
     void createCMUSActions();
 
     void createTrayIcon();
+    void activatedTrayIcon(QSystemTrayIcon::ActivationReason reason);
 };
 
 #endif // CMUSTRAYICON_H

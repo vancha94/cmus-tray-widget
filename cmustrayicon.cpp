@@ -11,11 +11,14 @@ CmusTrayIcon::CmusTrayIcon(QWidget *parent)
    // this->hide();
 //    cmusPros = new QProcess(this);
 //    cmusPros->start("cmus");
+    actionIndex = 0;
 
     initStrings();
     createCMUSActions();
 
     createTrayIcon();
+    stop();
+
 
 
 }
@@ -27,23 +30,28 @@ void CmusTrayIcon::createTrayIcon()
     trayIconMenu->addAction(pauseCMUS);
     trayIconMenu->addAction(nextTrackCMUS);
     trayIconMenu->addAction(previosTrackCMUS);
+    trayIconMenu->addAction(stopCMUS);
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
     trayIcon->setIcon(pauseCMUS->icon());
     trayIcon->show();
+
+    connect(trayIcon,&QSystemTrayIcon::activated,this,&CmusTrayIcon::activatedTrayIcon);
 }
 
 void CmusTrayIcon::createCMUSActions()
 {
-    createAction(playCMUS, "play", 0);
+    createAction(playCMUS, "play");
     connect(playCMUS, &QAction::triggered, this, &CmusTrayIcon::play);
-    createAction(pauseCMUS, "pause", 1, false);
+    createAction(pauseCMUS, "pause", false);
     connect(pauseCMUS, &QAction::triggered, this, &CmusTrayIcon::pause);
-    createAction(nextTrackCMUS, "next", 2);
+    createAction(nextTrackCMUS, "next");
     connect(nextTrackCMUS, &QAction::triggered, this, &CmusTrayIcon::nextTrack);
-    createAction(previosTrackCMUS, "back", 3);
+    createAction(previosTrackCMUS, "back");
     connect(previosTrackCMUS,&QAction::triggered, this, &CmusTrayIcon::previosTrack);
+    createAction(stopCMUS,"stop");
+    connect(stopCMUS,&QAction::triggered,this,&CmusTrayIcon::stop);
 }
 
 void CmusTrayIcon::initStrings()
@@ -54,14 +62,17 @@ void CmusTrayIcon::initStrings()
     arguments.append("-n"); // next
     arguments.append("-r"); //previos
     arguments.append("-Q"); // info track
+    arguments.append("-s"); // stop
 }
 
-void CmusTrayIcon::createAction(QAction *&action, const QString name, int data, bool isVisible)
+void CmusTrayIcon::createAction(QAction *&action, const QString name, bool isVisible)
 {
+
     QString iconAdress = QString(":icons/") + name + QString("-button.png");
     action = new QAction(QIcon(iconAdress), name, this);
-    action->setData(data);
+    action->setData(actionIndex);
     action->setVisible(isVisible);
+    actionIndex++;
 }
 
 CmusTrayIcon::~CmusTrayIcon()
@@ -76,7 +87,9 @@ void CmusTrayIcon::play()
     makeCommand(arg);
     pauseCMUS->setVisible(true);
     playCMUS->setVisible(false);
+    stopCMUS->setVisible(true);
     trayIcon->setIcon(playCMUS->icon());
+
 }
 
 void CmusTrayIcon::pause()
@@ -86,6 +99,7 @@ void CmusTrayIcon::pause()
     makeCommand(arg);
     pauseCMUS->setVisible(false);
     playCMUS->setVisible(true);
+    stopCMUS->setVisible(false);
     trayIcon->setIcon(pauseCMUS->icon());
 }
 void CmusTrayIcon::nextTrack()
@@ -114,6 +128,37 @@ void CmusTrayIcon::show()
     QWidget::show();
     hide();
 }
+
+void CmusTrayIcon::activatedTrayIcon(QSystemTrayIcon::ActivationReason reason)
+{
+    switch  (reason)
+    {
+        case QSystemTrayIcon::Trigger:
+            if(pauseCMUS->isVisible())
+                pause();
+            else
+                play();
+            break;
+        case QSystemTrayIcon::MiddleClick:
+            nextTrack();
+            break;
+        default:
+            break;
+    }
+}
+
+void CmusTrayIcon::stop()
+{
+    auto  tmp = stopCMUS->data();
+    int arg = tmp.toInt();
+    makeCommand(arg);
+    playCMUS->setVisible(true);
+    pauseCMUS->setVisible(false);
+    stopCMUS->setVisible(false);
+    trayIcon->setIcon(stopCMUS->icon());
+
+}
+
 
 
 

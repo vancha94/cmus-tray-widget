@@ -4,5 +4,6 @@
         <file>icons/play-button.png</file>
         <file>icons/back-button.png</file>
         <file>icons/next-button.png</file>
+        <file>icons/stop-button.png</file>
     </qresource>
 </RCC>
