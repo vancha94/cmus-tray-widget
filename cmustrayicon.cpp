@@ -8,20 +8,14 @@
 CmusTrayIcon::CmusTrayIcon(QWidget *parent)
     : QMainWindow(parent)
 {
-   // this->hide();
 //    cmusPros = new QProcess(this);
 //    cmusPros->start("cmus");
+
     actionIndex = 0;
-
-    initStrings();
-
-
     createTrayIcon();
     createCMUSActions();
-
+    initStrings();
     stop();
-
-
 
 }
 
@@ -45,30 +39,25 @@ void CmusTrayIcon::createTrayIcon()
 
 void CmusTrayIcon::createCMUSActions()
 {
-    createAction(playCMUS, "play");
+    createAction(playCMUS, "play", "-p", false);
     connect(playCMUS, &QAction::triggered, this, &CmusTrayIcon::play);
-    createAction(pauseCMUS, "pause", false);
+    createAction(pauseCMUS, "pause", "-u", false);
     connect(pauseCMUS, &QAction::triggered, this, &CmusTrayIcon::pause);
-    createAction(nextTrackCMUS, "next");
+    createAction(nextTrackCMUS, "next", "-n", false);
     connect(nextTrackCMUS, &QAction::triggered, this, &CmusTrayIcon::nextTrack);
-    createAction(previosTrackCMUS, "back");
+    createAction(previosTrackCMUS, "back", "-r", false);
     connect(previosTrackCMUS,&QAction::triggered, this, &CmusTrayIcon::previosTrack);
-    createAction(stopCMUS,"stop");
+    createAction(stopCMUS, "stop", "-s", false);
     connect(stopCMUS,&QAction::triggered,this,&CmusTrayIcon::stop);
 }
 
 void CmusTrayIcon::initStrings()
 {
     command = "cmus-remote";
-    arguments.append("-p"); // play
-    arguments.append("-u"); // pause
-    arguments.append("-n"); // next
-    arguments.append("-r"); //previos
-    arguments.append("-s"); // stop
     arguments.append("-Q"); // info track
 }
 
-void CmusTrayIcon::createAction(QAction *&action, const QString name, bool isVisible)
+void CmusTrayIcon::createAction(QAction *&action, const QString name, QString arg, bool isVisible)
 {
 
     QString iconAdress = QString(":icons/") + name + QString("-button.png");
@@ -76,12 +65,13 @@ void CmusTrayIcon::createAction(QAction *&action, const QString name, bool isVis
     action->setData(actionIndex);
     action->setVisible(isVisible);
     trayIconMenu->addAction(action);
+    arguments.append(arg);
     actionIndex++;
 }
 
 CmusTrayIcon::~CmusTrayIcon()
 {
-
+    stop();
 }
 
 void CmusTrayIcon::play()

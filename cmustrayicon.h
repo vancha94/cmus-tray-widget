@@ -41,7 +41,7 @@ public slots:
 
 private:
     void makeCommand(int arg);
-    void createAction(QAction *&action, const QString name, bool isVisible = true);
+    void createAction(QAction *&action, const QString name, QString arg, bool isVisible);
 
     void initStrings();
 
