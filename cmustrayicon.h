@@ -1,9 +1,12 @@
 #ifndef CMUSTRAYICON_H
 #define CMUSTRAYICON_H
 
+static const int msecs = 3000;
+
 #include <QMainWindow>
 #include <QtWidgets/QSystemTrayIcon>
 #include <QProcess>
+#include <QtCore/QFuture>
 
 class CmusTrayIcon : public QMainWindow
 {
@@ -24,6 +27,10 @@ private:
 
     QProcess *cmusPros;
 
+    QFuture<void> textThread;
+    QMutex mutex;
+    QStringList consoleText;
+
 
 
 public:
@@ -32,6 +39,8 @@ public:
 
     void show();
 
+    void processingOutputConsole();
+
 public slots:
     void play();
     void pause();
@@ -39,17 +48,18 @@ public slots:
     void previosTrack();
     void stop();
 
+
 private:
     void makeCommand(int arg);
 
-    void createAction(QAction *&action, const QString name, QString arg, bool isVisible = true);
-
+    void createAction(QAction *&action, QString name, QString arg, bool isVisible = true);
     void initStrings();
-
     void createCMUSActions();
-
     void createTrayIcon();
     void activatedTrayIcon(QSystemTrayIcon::ActivationReason reason);
+
+    QString getSubString(QString str, QString start, QString end);
+
 };
 
 #endif // CMUSTRAYICON_H

@@ -2,15 +2,14 @@
 #include "cmustrayicon.h"
 #include <QAction>
 #include <QMenu>
-
+#include <QtConcurrent/QtConcurrentRun>
+#include <QtCore/QtMath>
+//#include <QtConcurrent>
 
 
 CmusTrayIcon::CmusTrayIcon(QWidget *parent)
     : QMainWindow(parent)
 {
-//    cmusPros = new QProcess(this);
-//    cmusPros->start("cmus");
-
     actionIndex = 0;
     createTrayIcon();
     createCMUSActions();
@@ -34,7 +33,7 @@ void CmusTrayIcon::createTrayIcon()
     trayIcon->setIcon(QIcon(":icons/stop-button.png"));
     trayIcon->show();
 
-    trayIcon->showMessage("Hello", "CMUS is started");
+    trayIcon->showMessage("Hello", "CMUS is started", QSystemTrayIcon::NoIcon, msecs);
 
     connect(trayIcon,&QSystemTrayIcon::activated,this,&CmusTrayIcon::activatedTrayIcon);
 }
@@ -74,6 +73,7 @@ void CmusTrayIcon::createAction(QAction *&action, const QString name, QString ar
 CmusTrayIcon::~CmusTrayIcon()
 {
     stop();
+    textThread.cancel();
 }
 
 void CmusTrayIcon::play()
@@ -85,6 +85,7 @@ void CmusTrayIcon::play()
     playCMUS->setVisible(false);
     stopCMUS->setVisible(true);
     trayIcon->setIcon(playCMUS->icon());
+    textThread = QtConcurrent::run(this, &CmusTrayIcon::processingOutputConsole);
 
 }
 
@@ -97,12 +98,17 @@ void CmusTrayIcon::pause()
     playCMUS->setVisible(true);
     stopCMUS->setVisible(false);
     trayIcon->setIcon(pauseCMUS->icon());
+    textThread.cancel();
 }
 void CmusTrayIcon::nextTrack()
 {
     auto  tmp = nextTrackCMUS->data();
     int arg = tmp.toInt();
     makeCommand(arg);
+    makeCommand(arguments.length() - 1);
+    textThread.cancel();
+    while (!textThread.isCanceled());
+    textThread = QtConcurrent::run(this, &CmusTrayIcon::processingOutputConsole);
 }
 void CmusTrayIcon::previosTrack()
 {
@@ -117,6 +123,12 @@ void CmusTrayIcon::makeCommand(int arg)
     QStringList argument;
     argument << arguments[arg];
     process->start(command,argument);
+
+
+    mutex.lock();
+    process->waitForFinished();
+    consoleText.append(QString(process->readAllStandardOutput()));
+    mutex.unlock();
 }
 
 void CmusTrayIcon::show()
@@ -153,6 +165,50 @@ void CmusTrayIcon::stop()
     stopCMUS->setVisible(false);
     trayIcon->setIcon(stopCMUS->icon());
 
+}
+
+void CmusTrayIcon::processingOutputConsole()
+{
+    while (true)
+    {
+        int pauseTimeSecond = 1;
+        bool isFirst = true;
+        consoleText.clear();
+        makeCommand(arguments.length() - 1);
+        QThread::sleep(pauseTimeSecond);
+        makeCommand(arguments.length() - 1);
+        QString str;
+        QString artist, song;
+        int startN, endN, countN;
+                foreach(str, consoleText)
+            {
+                if (str != QString())
+                {
+                    if (isFirst)
+                    {
+                        song = getSubString(str, "tag title", "\n");
+                        artist = getSubString(str, "tag artist", "\n");
+                        countN = getSubString(str, "duration", "\n").toInt();
+                        startN = getSubString(str, "position", "\n").toInt();
+
+                        isFirst = false;
+                    }
+                    endN = getSubString(str, "position", "tag artist").toInt();
+                }
+
+            }
+        trayIcon->showMessage(artist, song, QSystemTrayIcon::NoIcon, msecs);
+        int timePause = qCeil((float) pauseTimeSecond * (countN - endN) / ((float) (endN - startN)));
+        QThread::sleep(timePause);
+    }
+}
+
+QString CmusTrayIcon::getSubString(QString str, QString start, QString end)
+{
+    int indexStart = str.indexOf(start) + start.size();
+    int indexEnd = str.indexOf(end, indexStart);
+    int len = indexEnd - indexStart;
+    return str.mid(indexStart, len);;
 }
 
 
