@@ -34,20 +34,22 @@ void CmusTrayIcon::createTrayIcon()
     trayIcon->setIcon(QIcon(":icons/stop-button.png"));
     trayIcon->show();
 
+    trayIcon->showMessage("Hello", "CMUS is started");
+
     connect(trayIcon,&QSystemTrayIcon::activated,this,&CmusTrayIcon::activatedTrayIcon);
 }
 
 void CmusTrayIcon::createCMUSActions()
 {
-    createAction(playCMUS, "play", "-p", false);
+    createAction(playCMUS, "play", "-p");
     connect(playCMUS, &QAction::triggered, this, &CmusTrayIcon::play);
     createAction(pauseCMUS, "pause", "-u", false);
     connect(pauseCMUS, &QAction::triggered, this, &CmusTrayIcon::pause);
-    createAction(nextTrackCMUS, "next", "-n", false);
+    createAction(nextTrackCMUS, "next", "-n");
     connect(nextTrackCMUS, &QAction::triggered, this, &CmusTrayIcon::nextTrack);
-    createAction(previosTrackCMUS, "back", "-r", false);
+    createAction(previosTrackCMUS, "back", "-r");
     connect(previosTrackCMUS,&QAction::triggered, this, &CmusTrayIcon::previosTrack);
-    createAction(stopCMUS, "stop", "-s", false);
+    createAction(stopCMUS, "stop", "-s");
     connect(stopCMUS,&QAction::triggered,this,&CmusTrayIcon::stop);
 }
 
