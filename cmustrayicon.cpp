@@ -14,9 +14,11 @@ CmusTrayIcon::CmusTrayIcon(QWidget *parent)
     actionIndex = 0;
 
     initStrings();
-    createCMUSActions();
+
 
     createTrayIcon();
+    createCMUSActions();
+
     stop();
 
 
@@ -26,15 +28,16 @@ CmusTrayIcon::CmusTrayIcon(QWidget *parent)
 void CmusTrayIcon::createTrayIcon()
 {
     trayIconMenu = new QMenu(this);
-    trayIconMenu->addAction(playCMUS);
-    trayIconMenu->addAction(pauseCMUS);
-    trayIconMenu->addAction(nextTrackCMUS);
-    trayIconMenu->addAction(previosTrackCMUS);
-    trayIconMenu->addAction(stopCMUS);
+//    trayIconMenu->addAction(playCMUS);
+//    trayIconMenu->addAction(pauseCMUS);
+//    trayIconMenu->addAction(nextTrackCMUS);
+//    trayIconMenu->addAction(previosTrackCMUS);
+//    trayIconMenu->addAction(stopCMUS);
+
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
-    trayIcon->setIcon(pauseCMUS->icon());
+    trayIcon->setIcon(QIcon(":icons/stop-button.png"));
     trayIcon->show();
 
     connect(trayIcon,&QSystemTrayIcon::activated,this,&CmusTrayIcon::activatedTrayIcon);
@@ -61,8 +64,8 @@ void CmusTrayIcon::initStrings()
     arguments.append("-u"); // pause
     arguments.append("-n"); // next
     arguments.append("-r"); //previos
-    arguments.append("-Q"); // info track
     arguments.append("-s"); // stop
+    arguments.append("-Q"); // info track
 }
 
 void CmusTrayIcon::createAction(QAction *&action, const QString name, bool isVisible)
@@ -72,6 +75,7 @@ void CmusTrayIcon::createAction(QAction *&action, const QString name, bool isVis
     action = new QAction(QIcon(iconAdress), name, this);
     action->setData(actionIndex);
     action->setVisible(isVisible);
+    trayIconMenu->addAction(action);
     actionIndex++;
 }
 
