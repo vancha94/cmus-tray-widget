@@ -30,6 +30,7 @@ private:
     QFuture<void> textThread;
     QMutex mutex;
     QStringList consoleText;
+    bool keepPlaying;
 
 
 
