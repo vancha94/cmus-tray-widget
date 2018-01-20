@@ -3,8 +3,7 @@
 #include <QAction>
 #include <QMenu>
 #include <QtConcurrent/QtConcurrentRun>
-#include <QtCore/QtMath>
-//#include <QtConcurrent>
+
 
 
 CmusTrayIcon::CmusTrayIcon(QWidget *parent)
@@ -21,12 +20,6 @@ CmusTrayIcon::CmusTrayIcon(QWidget *parent)
 void CmusTrayIcon::createTrayIcon()
 {
     trayIconMenu = new QMenu(this);
-//    trayIconMenu->addAction(playCMUS);
-//    trayIconMenu->addAction(pauseCMUS);
-//    trayIconMenu->addAction(nextTrackCMUS);
-//    trayIconMenu->addAction(previosTrackCMUS);
-//    trayIconMenu->addAction(stopCMUS);
-
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
@@ -105,16 +98,14 @@ void CmusTrayIcon::nextTrack()
     auto  tmp = nextTrackCMUS->data();
     int arg = tmp.toInt();
     makeCommand(arg);
-    makeCommand(arguments.length() - 1);
-    textThread.cancel();
-    while (!textThread.isCanceled());
-    textThread = QtConcurrent::run(this, &CmusTrayIcon::processingOutputConsole);
+
 }
 void CmusTrayIcon::previosTrack()
 {
     auto  tmp = previosTrackCMUS->data();
     int arg = tmp.toInt();
     makeCommand(arg);
+    textThread.cancel();
 }
 
 void CmusTrayIcon::makeCommand(int arg)
@@ -164,42 +155,61 @@ void CmusTrayIcon::stop()
     pauseCMUS->setVisible(false);
     stopCMUS->setVisible(false);
     trayIcon->setIcon(stopCMUS->icon());
+    textThread.cancel();
 
 }
 
 void CmusTrayIcon::processingOutputConsole()
 {
+    QString str;
+    QString artist, song, songOld = "";
+    int duration, durationOld = 0;
+    consoleText.clear();
     while (true)
     {
-        int pauseTimeSecond = 1;
-        bool isFirst = true;
-        consoleText.clear();
         makeCommand(arguments.length() - 1);
-        QThread::sleep(pauseTimeSecond);
-        makeCommand(arguments.length() - 1);
-        QString str;
-        QString artist, song;
-        int startN, endN, countN;
-                foreach(str, consoleText)
-            {
-                if (str != QString())
-                {
-                    if (isFirst)
-                    {
-                        song = getSubString(str, "tag title", "\n");
-                        artist = getSubString(str, "tag artist", "\n");
-                        countN = getSubString(str, "duration", "\n").toInt();
-                        startN = getSubString(str, "position", "\n").toInt();
+        int index = consoleText.lastIndexOf(QRegExp(".+"));
+        str = consoleText[index];
+        duration = getSubString(str, "duration", "\n").toInt();
+        song = getSubString(str, "tag title", "\n");
+        if (duration != durationOld || song != songOld)
+        {
+            artist = getSubString(str, "tag artist", "\n");
+            trayIcon->showMessage(artist, song, QSystemTrayIcon::NoIcon, msecs);
+            durationOld = duration;
+            songOld = song;
+            consoleText.clear();
 
-                        isFirst = false;
-                    }
-                    endN = getSubString(str, "position", "tag artist").toInt();
-                }
+        }
 
-            }
-        trayIcon->showMessage(artist, song, QSystemTrayIcon::NoIcon, msecs);
-        int timePause = qCeil((float) pauseTimeSecond * (countN - endN) / ((float) (endN - startN)));
-        QThread::sleep(timePause);
+//        float pauseTimeSecond = 0.8;
+//        bool isFirst = true;
+//        consoleText.clear();
+//        makeCommand(arguments.length() - 1);
+//        QThread::msleep(qCeil(pauseTimeSecond*1000));
+//        makeCommand(arguments.length() - 1);
+//
+//        int startN, endN, countN;
+//                foreach(str, consoleText)
+//            {
+//                if (str != QString())
+//                {
+//                    if (isFirst)
+//                    {
+//                        song = getSubString(str, "tag title", "\n");
+//                        artist = getSubString(str, "tag artist", "\n");
+//                        countN = getSubString(str, "duration", "\n").toInt();
+//                        startN = getSubString(str, "position", "\n").toInt();
+//
+//                        isFirst = false;
+//                    }
+//                    endN = getSubString(str, "position", "tag artist").toInt();
+//                }
+//
+//            }
+//        trayIcon->showMessage(artist, song, QSystemTrayIcon::NoIcon, msecs);
+//        int timePause = qCeil( pauseTimeSecond * (countN - endN) / ((float) (endN - startN)));
+//        QThread::sleep(timePause);
     }
 }
 
