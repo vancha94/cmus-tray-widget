@@ -1,7 +1,7 @@
 #ifndef CMUSTRAYICON_H
 #define CMUSTRAYICON_H
 
-static const int msecs = 3000;
+static const int msecs = 4000;
 
 #include <QMainWindow>
 #include <QtWidgets/QSystemTrayIcon>
@@ -20,6 +20,7 @@ private:
     QAction *nextTrackCMUS;
     QAction *previosTrackCMUS;
     QAction *stopCMUS;
+    QAction *aboutQtAction;
     int actionIndex;
 
     QString command;
@@ -32,14 +33,11 @@ private:
     QStringList consoleText;
     bool keepPlaying;
 
-
-
 public:
     CmusTrayIcon(QWidget *parent = 0);
     ~CmusTrayIcon();
 
     void show();
-
     void processingOutputConsole();
 
 public slots:
@@ -52,15 +50,12 @@ public slots:
 
 private:
     void makeCommand(int arg);
-
     void createAction(QAction *&action, QString name, QString arg, bool isVisible = true);
     void initStrings();
     void createCMUSActions();
     void createTrayIcon();
     void activatedTrayIcon(QSystemTrayIcon::ActivationReason reason);
-
     QString getSubString(QString str, QString start, QString end);
-
 };
 
 #endif // CMUSTRAYICON_H

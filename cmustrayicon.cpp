@@ -3,7 +3,7 @@
 #include <QAction>
 #include <QMenu>
 #include <QtConcurrent/QtConcurrentRun>
-
+#include <QtWidgets>
 
 
 CmusTrayIcon::CmusTrayIcon(QWidget *parent)
@@ -27,7 +27,6 @@ void CmusTrayIcon::createTrayIcon()
     trayIcon->show();
 
     trayIcon->showMessage("Hello", "CMUS is started", QSystemTrayIcon::NoIcon, msecs);
-
     connect(trayIcon,&QSystemTrayIcon::activated,this,&CmusTrayIcon::activatedTrayIcon);
 }
 
@@ -43,6 +42,9 @@ void CmusTrayIcon::createCMUSActions()
     connect(previosTrackCMUS,&QAction::triggered, this, &CmusTrayIcon::previosTrack);
     createAction(stopCMUS, "stop", "-s");
     connect(stopCMUS,&QAction::triggered,this,&CmusTrayIcon::stop);
+    // createAction(aboutQtAction,"About qt","-Q");
+    //  connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
+    //  connect(aboutQtAction,&QAction::triggered,this,&CmusTrayIcon::aboutQt);
 }
 
 void CmusTrayIcon::initStrings()
