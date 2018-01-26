@@ -206,7 +206,7 @@ QString CmusTrayIcon::getSubString(QString str, QString start, QString end)
 void CmusTrayIcon::startCMUS()
 {
     cmusProc = new QProcess(this);
-    cmusProc->start("konsole", QStringList() << "-e" << "cmus");
+    cmusProc->start("screen", QStringList() << "-dmS" << "cm" << "cmus");
     //<<"--background-mode"
     // cmusProc.
     //  cmusProc.
