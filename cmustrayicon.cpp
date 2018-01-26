@@ -9,10 +9,13 @@
 CmusTrayIcon::CmusTrayIcon(QWidget *parent)
     : QMainWindow(parent)
 {
+
     actionIndex = 0;
     createTrayIcon();
     createCMUSActions();
     initStrings();
+    // QtConcurrent::run(this,&CmusTrayIcon::startCMUS);
+    startCMUS();
     stop();
 
 }
@@ -70,6 +73,8 @@ CmusTrayIcon::~CmusTrayIcon()
     stop();
     keepPlaying = false;
     textThread.waitForFinished();
+    cmusProc->close();
+
 }
 
 void CmusTrayIcon::play()
@@ -185,6 +190,7 @@ void CmusTrayIcon::processingOutputConsole()
             songOld = song;
             consoleText.clear();
         }
+        QThread::sleep(1);
 
     }
 }
@@ -195,6 +201,17 @@ QString CmusTrayIcon::getSubString(QString str, QString start, QString end)
     int indexEnd = str.indexOf(end, indexStart);
     int len = indexEnd - indexStart;
     return str.mid(indexStart, len);;
+}
+
+void CmusTrayIcon::startCMUS()
+{
+    cmusProc = new QProcess(this);
+    cmusProc->start("konsole", QStringList() << "-e" << "cmus");
+    //<<"--background-mode"
+    // cmusProc.
+    //  cmusProc.
+
+//    qDebug() << cmusProc->readAllStandardOutput() << ":" << cmusProc->exitStatus() << ":" << cmusProc->readAllStandardError();
 }
 
 

@@ -26,7 +26,7 @@ private:
     QString command;
     QVector<QString> arguments;
 
-    QProcess *cmusPros;
+    QProcess *cmusProc;
 
     QFuture<void> textThread;
     QMutex mutex;
@@ -56,6 +56,8 @@ private:
     void createTrayIcon();
     void activatedTrayIcon(QSystemTrayIcon::ActivationReason reason);
     QString getSubString(QString str, QString start, QString end);
+
+    void startCMUS();
 };
 
 #endif // CMUSTRAYICON_H
