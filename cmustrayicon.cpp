@@ -77,10 +77,6 @@ CmusTrayIcon::~CmusTrayIcon()
     stop();
     keepPlaying = false;
     textThread.waitForFinished();
-    // cmusProc->kill();
-    //cmusProc->close();
-    //Q_PID pid = cmusProc->pid();
-    //QString programm="screen";
     QProcess *killProc = new QProcess(this);
     killProc->start("killall", QStringList() << programm);
     killProc->waitForFinished();
@@ -217,12 +213,6 @@ void CmusTrayIcon::startCMUS()
 {
     cmusProc = new QProcess(this);
     cmusProc->start("screen", QStringList() << "-dmS" << "cm" << "cmus");
-
-    //<<"--background-mode"
-    // cmusProc.
-    //  cmusProc.
-
-//    qDebug() << cmusProc->readAllStandardOutput() << ":" << cmusProc->exitStatus() << ":" << cmusProc->readAllStandardError();
 }
 
 

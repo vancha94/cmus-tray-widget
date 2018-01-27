@@ -2,9 +2,8 @@
 #include <QApplication>
 
 // TODO: сделать диаалог о QT
-// TODO: Сделать запуск CMUS вместе с программой
 // TODO: добавить окно about
-// TODO: выложить на гитхаб
+// TODO: Сделать окно настроек
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
