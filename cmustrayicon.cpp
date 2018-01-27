@@ -77,6 +77,11 @@ CmusTrayIcon::~CmusTrayIcon()
     stop();
     keepPlaying = false;
     textThread.waitForFinished();
+    closeCMUS();
+}
+
+void CmusTrayIcon::closeCMUS()
+{
     QProcess *killProc = new QProcess(this);
     killProc->start("killall", QStringList() << programm);
     killProc->waitForFinished();
@@ -93,6 +98,7 @@ void CmusTrayIcon::play()
     stopCMUS->setVisible(true);
     trayIcon->setIcon(playCMUS->icon());
     textThread = QtConcurrent::run(this, &CmusTrayIcon::processingOutputConsole);
+    isPaused = false;
 
 }
 
@@ -106,7 +112,8 @@ void CmusTrayIcon::pause()
     stopCMUS->setVisible(false);
     trayIcon->setIcon(pauseCMUS->icon());
     keepPlaying = false;
-    textThread.waitForFinished();
+    if (!isPaused)
+        textThread.waitForFinished();
 }
 void CmusTrayIcon::nextTrack()
 {
@@ -178,16 +185,19 @@ void CmusTrayIcon::processingOutputConsole()
 {
     QString str;
     QString artist, song, songOld = "";
+    QString status = "";
     int duration, durationOld = 0;
     consoleText.clear();
     keepPlaying = true;
     while (keepPlaying)
     {
         makeCommand(arguments.length() - 1);
-        int index = consoleText.lastIndexOf(QRegExp(".+"));
+        int index = consoleText.lastIndexOf(QRegExp(".+")); // поиск последнего непустого значения в выводе
         str = consoleText[index];
         duration = getSubString(str, "duration", "\n").toInt();
         song = getSubString(str, "tag title", "\n");
+        status = getSubString(str, "status", "\n");
+        status = status.trimmed();
         if (duration != durationOld || song != songOld)
         {
             artist = getSubString(str, "tag artist", "\n");
@@ -196,6 +206,20 @@ void CmusTrayIcon::processingOutputConsole()
             songOld = song;
             consoleText.clear();
         }
+        if (status == "stopped")
+        {
+            stop();
+
+        } else if (status == "paused")
+        {
+            isPaused = true;
+            pause();
+            isPaused = false;
+            pause();
+
+            // двойной вызово паузы из-за особенностей cmus-remote -u, котороая  меняет состояние произведения
+        }
+
         QThread::sleep(1);
 
     }

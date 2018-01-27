@@ -35,6 +35,8 @@ private:
     QStringList consoleText;
     bool keepPlaying;
 
+    bool isPaused;
+
 public:
     CmusTrayIcon(QWidget *parent = 0);
     ~CmusTrayIcon();
@@ -60,6 +62,8 @@ private:
     QString getSubString(QString str, QString start, QString end);
 
     void startCMUS();
+
+    void closeCMUS();
 };
 
 #endif // CMUSTRAYICON_H
