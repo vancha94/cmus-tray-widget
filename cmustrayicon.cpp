@@ -11,6 +11,7 @@ CmusTrayIcon::CmusTrayIcon(QWidget *parent)
 {
 
     actionIndex = 0;
+    programm = "screen";
     createTrayIcon();
     createCMUSActions();
     initStrings();
@@ -45,9 +46,12 @@ void CmusTrayIcon::createCMUSActions()
     connect(previosTrackCMUS,&QAction::triggered, this, &CmusTrayIcon::previosTrack);
     createAction(stopCMUS, "stop", "-s");
     connect(stopCMUS,&QAction::triggered,this,&CmusTrayIcon::stop);
+    createAction(quitAction, "close", "-s");
+    connect(quitAction, &QAction::triggered, this, &CmusTrayIcon::close);
     // createAction(aboutQtAction,"About qt","-Q");
     //  connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
     //  connect(aboutQtAction,&QAction::triggered,this,&CmusTrayIcon::aboutQt);
+
 }
 
 void CmusTrayIcon::initStrings()
@@ -73,8 +77,14 @@ CmusTrayIcon::~CmusTrayIcon()
     stop();
     keepPlaying = false;
     textThread.waitForFinished();
-    cmusProc->close();
-
+    // cmusProc->kill();
+    //cmusProc->close();
+    //Q_PID pid = cmusProc->pid();
+    //QString programm="screen";
+    QProcess *killProc = new QProcess(this);
+    killProc->start("killall", QStringList() << programm);
+    killProc->waitForFinished();
+    delete killProc;
 }
 
 void CmusTrayIcon::play()
@@ -207,6 +217,7 @@ void CmusTrayIcon::startCMUS()
 {
     cmusProc = new QProcess(this);
     cmusProc->start("screen", QStringList() << "-dmS" << "cm" << "cmus");
+
     //<<"--background-mode"
     // cmusProc.
     //  cmusProc.

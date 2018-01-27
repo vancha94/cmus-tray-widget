@@ -21,12 +21,14 @@ private:
     QAction *previosTrackCMUS;
     QAction *stopCMUS;
     QAction *aboutQtAction;
+    QAction *quitAction;
     int actionIndex;
 
     QString command;
     QVector<QString> arguments;
 
     QProcess *cmusProc;
+    QString programm;
 
     QFuture<void> textThread;
     QMutex mutex;
